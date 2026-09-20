@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: japablueprint-bot
+    env: python
+    plan: free
+    buildCommand: |
+      if [ -f requirements.txt ]; then pip install -r requirements.txt;
+      elif [ -f japablueprint-bot/requirements.txt ]; then pip install -r japablueprint-bot/requirements.txt;
+      else pip install python-telegram-bot==21.7 google-generativeai==0.8.3 requests beautifulsoup4 lxml python-dotenv flask apscheduler pytz;
+      fi
+    startCommand: |
+      if [ -f main.py ]; then python main.py;
+      elif [ -f japablueprint-bot/main.py ]; then cd japablueprint-bot && python main.py;
+      elif [ -f src/main.py ]; then python src/main.py;
+      else echo "Searching for main.py..." && find . -name main.py -type f && python $(find . -name main.py -type f | head -1);
+      fi
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CHANNEL_ID
+        sync: false
+      - key: WEBHOOK_URL
+        sync: false
