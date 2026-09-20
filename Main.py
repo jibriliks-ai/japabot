@@ -34,16 +34,9 @@ WEBSITE = "https://japablueprint.com.ng"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# AI Brain - safe init
-try:
-    if GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-    else:
-        model = None
-except Exception as e:
-    print(f"Gemini init failed: {e}")
-    model = None
+# AI Brain
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # Timezone for Nigeria
 LAGOS_TZ = pytz.timezone("Africa/Lagos")
@@ -159,8 +152,6 @@ def auto_post_job():
         logger.info(f"Auto-posted: {post['title']}")
 
 def ask_ai(question: str) -> str:
-    if not model:
-        return f"AI key not set. Visit {WEBSITE} for guides - search your topic there. 🛫"
     try:
         prompt = f"""
 You are Japablueprint.com.ng Professional Travel AI - like Meta AI.
@@ -250,10 +241,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ans = ask_ai(update.message.text)
     await update.message.reply_text(ans)
 
-# Build Telegram app - safe
-if not BOT_TOKEN:
-    print("ERROR: BOT_TOKEN not set!")
-    BOT_TOKEN = "dummy"
+# Build Telegram app
 application = Application.builder().token(BOT_TOKEN).build()
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CommandHandler("latest", latest_cmd))
